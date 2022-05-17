@@ -1,9 +1,12 @@
 ﻿
 using LabManager.Database;
+using LabManager.Repositories;
 using Microsoft.Data.Sqlite;
 
 var databaseConfig = new DatabaseConfig();
 var databaseSetup = new DatabaseSetup(databaseConfig);
+
+var computerRepository = new ComputerRepository(databaseConfig);
 
 // Routing
 var modelName = args[0];
@@ -13,23 +16,12 @@ if (modelName == "Computer")
 {
     if (modelAction == "List")
     {
-        var conn = new SqliteConnection("Data Source=database.db");
-        conn.Open();
-
-        var command = conn.CreateCommand();
-        command.CommandText = "SELECT * FROM Computers";
-
-        var reader = command.ExecuteReader();
 
         Console.WriteLine("Computer List");
-        while(reader.Read())
+        foreach (var computer in computerRepository.GetAll())
         {
-            Console.WriteLine("{0}, {1}, {2}", reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
-            reader.GetInt32(0);
+            Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processor);
         }
-
-        reader.Close();
-        conn.Close();
     }
 
     if (modelAction == "New")
