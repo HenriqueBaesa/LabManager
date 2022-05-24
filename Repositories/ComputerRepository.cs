@@ -43,7 +43,7 @@ class ComputerRepository
         return computers;
     }
 
-    public void Save(Computer computer)
+    public Computer Save(Computer computer)
     {
         var conn = new SqliteConnection(databaseConfig.ConnectionString);
         conn.Open();
@@ -53,8 +53,10 @@ class ComputerRepository
         command.Parameters.AddWithValue("$id", computer.Id);
         command.Parameters.AddWithValue("$ram", computer.Ram);
         command.Parameters.AddWithValue("$processor", computer.Processor);
-        command.ExecuteNonQuery();
 
+        command.ExecuteNonQuery();
         conn.Close();
+
+        return computer;
     }
 }
