@@ -16,7 +16,7 @@ class ComputerRepository
 
     public List<Computer> GetAll()
     {
-        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
@@ -38,7 +38,6 @@ class ComputerRepository
 
             reader.GetInt32(0);
         }
-        connection.Close();
 
         return computers;
     }
@@ -62,7 +61,7 @@ class ComputerRepository
 
     public Computer Save(Computer computer)
     {
-        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
@@ -72,14 +71,13 @@ class ComputerRepository
         command.Parameters.AddWithValue("$processor", computer.Processor);
 
         command.ExecuteNonQuery();
-        connection.Close();
 
         return computer;
     }
 
     public Computer Update(Computer computer)
     {
-        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
 
         var command = connection.CreateCommand();
@@ -89,8 +87,19 @@ class ComputerRepository
         command.Parameters.AddWithValue("$processor", computer.Processor);
 
         command.ExecuteNonQuery();
-        connection.Close();
 
         return computer;
+    }
+
+    public void Delete(int id)
+    {
+        using var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        connection.Open();
+
+        var command = connection.CreateCommand();
+
+        command.CommandText = "DELETE FROM Computers WHERE id = $id;";
+        command.Parameters.AddWithValue("$id", id);
+        command.ExecuteNonQuery();
     }
 }
