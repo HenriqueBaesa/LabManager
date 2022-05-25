@@ -16,6 +16,7 @@ $ dotnet run -- Computer New 1 16 'Intel core I7'
 $ dotnet run -- Lab New 1 14 'A'
 ````
 Computer: The parameters are id:'1' ram:'16' and processor:'Intel core I7'.
+
 Lab: The parameters are id:'1' number:'14' and block:'A'.
 
 
