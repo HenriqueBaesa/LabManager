@@ -14,10 +14,10 @@ class DatabaseSetup
 
     public void CreateComputerTable()
     {
-        var conn = new SqliteConnection("Data Source=database.db");
-        conn.Open();
+        var connection = new SqliteConnection("Data Source=database.db");
+        connection.Open();
 
-        var command = conn.CreateCommand();
+        var command = connection.CreateCommand();
         command.CommandText = @"
             CREATE TABLE IF NOT EXISTS Computers(
                 id int not null primary key,
@@ -32,6 +32,6 @@ class DatabaseSetup
         ";
         command.ExecuteNonQuery();
 
-        conn.Close();
+        connection.Close();
     }
 }
