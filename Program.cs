@@ -25,6 +25,13 @@ if (modelName == "Computer")
         }
     }
 
+    if (modelAction == "Show")
+    {
+        int id = Convert.ToInt32(args[2]);
+        var computer = computerRepository.GetById(id);
+        Console.WriteLine("{0}, {1}, {2}", computer.Id, computer.Ram, computer.Processor);
+    }
+
     if (modelAction == "New")
     {
         int id = Convert.ToInt32(args[2]);
@@ -42,10 +49,10 @@ else if (modelName == "Lab")
 {
     if (modelAction == "List")
     {
-        var conn = new SqliteConnection("Data Source=database.db");
-        conn.Open();
+        var connection = new SqliteConnection("Data Source=database.db");
+        connection.Open();
 
-        var command = conn.CreateCommand();
+        var command = connection.CreateCommand();
         command.CommandText = "SELECT * FROM Lab";
 
         var reader = command.ExecuteReader();
@@ -58,25 +65,25 @@ else if (modelName == "Lab")
         }
 
         reader.Close();
-        conn.Close();
+        connection.Close();
     }
 
     if (modelAction == "New")
     {
-        var conn = new SqliteConnection("Data Source=database.db");
-        conn.Open();
+        var connection = new SqliteConnection("Data Source=database.db");
+        connection.Open();
 
         int id = Convert.ToInt32(args[2]);
         string number = args[3];
         string block = args[4];
 
-        var command = conn.CreateCommand();
+        var command = connection.CreateCommand();
         command.CommandText = "INSERT INTO Lab VALUES($id, $number, $block)";
         command.Parameters.AddWithValue("$id", id);
         command.Parameters.AddWithValue("$number", number);
         command.Parameters.AddWithValue("$block", block);
         command.ExecuteNonQuery();
 
-        conn.Close();
+        connection.Close();
     }
 }

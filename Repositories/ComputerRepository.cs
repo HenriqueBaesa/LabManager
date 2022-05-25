@@ -16,10 +16,10 @@ class ComputerRepository
 
     public List<Computer> GetAll()
     {
-        var conn = new SqliteConnection(databaseConfig.ConnectionString);
-        conn.Open();
+        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        connection.Open();
 
-        var command = conn.CreateCommand();
+        var command = connection.CreateCommand();
         command.CommandText = "SELECT * FROM Computers";
 
         var reader = command.ExecuteReader();
@@ -38,24 +38,41 @@ class ComputerRepository
 
             reader.GetInt32(0);
         }
-        conn.Close();
+        connection.Close();
 
         return computers;
     }
 
+    public Computer GetById(int id)
+    {
+        using var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        connection.Open();
+
+        var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT id, ram, processor FROM Computers WHERE id = $id";
+        command.Parameters.AddWithValue("$id", id);
+
+        var reader = command.ExecuteReader();
+        reader.Read();
+
+        var computer = new Computer(reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
+        return computer;
+    }
+
     public Computer Save(Computer computer)
     {
-        var conn = new SqliteConnection(databaseConfig.ConnectionString);
-        conn.Open();
+        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        connection.Open();
 
-        var command = conn.CreateCommand();
+        var command = connection.CreateCommand();
         command.CommandText = "INSERT INTO Computers VALUES($id, $ram, $processor)";
         command.Parameters.AddWithValue("$id", computer.Id);
         command.Parameters.AddWithValue("$ram", computer.Ram);
         command.Parameters.AddWithValue("$processor", computer.Processor);
 
         command.ExecuteNonQuery();
-        conn.Close();
+        connection.Close();
 
         return computer;
     }
