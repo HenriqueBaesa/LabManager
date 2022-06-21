@@ -2,6 +2,7 @@
 using LabManager.Database;
 using LabManager.Models;
 using Microsoft.Data.Sqlite;
+using Dapper;
 
 namespace LabManager.Repositories;
 
@@ -14,30 +15,12 @@ class ComputerRepository
         this.databaseConfig = databaseConfig;
     }
 
-    public List<Computer> GetAll()
+    public IEnumerable<Computer> GetAll()
     {
         using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
 
-        var command = connection.CreateCommand();
-        command.CommandText = "SELECT * FROM Computers";
-
-        var reader = command.ExecuteReader();
-
-        var computers = new List<Computer>();
-
-        while(reader.Read())
-        {
-            computers.Add(
-                new Computer(
-                    reader.GetInt32(0),
-                    reader.GetString(1),
-                    reader.GetString(2)
-                )
-            );
-
-            reader.GetInt32(0);
-        }
+        var computers = connection.Query<Computer>("SELECT * FROM Computers");
 
         return computers;
     }
@@ -46,16 +29,10 @@ class ComputerRepository
     {
         using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
+        
+        var computer = connection.QuerySingle<Computer>
+        ("SELECT * FROM Computers WHERE Id = @Id", new {Id = id});
 
-        var command = connection.CreateCommand();
-
-        command.CommandText = "SELECT id, ram, processor FROM Computers WHERE id = $id";
-        command.Parameters.AddWithValue("$id", id);
-
-        var reader = command.ExecuteReader();
-        reader.Read();
-
-        var computer = new Computer(reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
         return computer;
     }
 
@@ -64,13 +41,8 @@ class ComputerRepository
         using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
 
-        var command = connection.CreateCommand();
-        command.CommandText = "INSERT INTO Computers VALUES($id, $ram, $processor)";
-        command.Parameters.AddWithValue("$id", computer.Id);
-        command.Parameters.AddWithValue("$ram", computer.Ram);
-        command.Parameters.AddWithValue("$processor", computer.Processor);
-
-        command.ExecuteNonQuery();
+        connection.Execute("INSERT INTO Computers VALUES(@Id, @Ram, @Processor)",
+        computer);
 
         return computer;
     }
@@ -80,13 +52,8 @@ class ComputerRepository
         using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
 
-        var command = connection.CreateCommand();
-        command.CommandText = "UPDATE Computers SET id = $id, ram = $ram, processor = $processor WHERE id = $id;";
-        command.Parameters.AddWithValue("$id", computer.Id);
-        command.Parameters.AddWithValue("$ram", computer.Ram);
-        command.Parameters.AddWithValue("$processor", computer.Processor);
-
-        command.ExecuteNonQuery();
+        connection.Execute("UPDATE Computers SET id = @Id, ram = @Ram, processor = @Processor WHERE id = @Id;",
+        computer);
 
         return computer;
     }
@@ -96,10 +63,23 @@ class ComputerRepository
         using var connection = new SqliteConnection(databaseConfig.ConnectionString);
         connection.Open();
 
-        var command = connection.CreateCommand();
+        connection.Execute("DELETE FROM Computers WHERE id = @Id;", new {Id = id});
+    }
 
-        command.CommandText = "DELETE FROM Computers WHERE id = $id;";
-        command.Parameters.AddWithValue("$id", id);
-        command.ExecuteNonQuery();
+    public bool ExitsById(int id)
+    {
+        var connection = new SqliteConnection(databaseConfig.ConnectionString);
+        connection.Open();
+
+        var result = Convert.ToBoolean(connection.ExecuteScalar(
+            "SELECT count(id) FROM Computers WHERE id = $id;"));
+
+        return result;
+    }
+
+    private Computer ReaderToComputer(SqliteDataReader reader)
+    {
+        var computer = new Computer(reader.GetInt32(0), reader.GetString(1), reader.GetString(2));
+        return computer;
     }
 }
